@@ -1,8 +1,8 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
 
 import {world} from "./src/world.js";
-import {Transform,MeshRenderer,Velocity} from "../src/components.js";
-import {MovementSystem,RenderSyncSystem} from "../src/systems.js";
+import {Transform,MeshRenderer,Velocity} from "./src/components.js";
+import {MovementSystem,RenderSyncSystem} from "./src/systems.js";
 
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,1000);
