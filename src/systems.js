@@ -106,3 +106,27 @@ export class CameraFollowSystem {
     this.camera.position.y = t.position.y;
   }
 }
+// Player Movement 
+class PlayerMovementSystem {
+  constructor(player, speed = 5) {
+    this.player = player;
+    this.speed = speed;
+    this.keys = {};
+    window.addEventListener("keydown", e => this.keys[e.key] = true);
+    window.addEventListener("keyup", e => this.keys[e.key] = false);
+  }
+
+  update(world, dt) {
+    const t = world.getComponent(this.player, "Transform");
+    if (!t) return;
+
+    if (this.keys["ArrowLeft"] || this.keys["a"])  t.position.x -= this.speed * dt;
+    if (this.keys["ArrowRight"] || this.keys["d"]) t.position.x += this.speed * dt;
+    if (this.keys["ArrowUp"] || this.keys["w"])    t.position.y += this.speed * dt;
+    if (this.keys["ArrowDown"] || this.keys["s"])  t.position.y -= this.speed * dt;
+
+    // Clamp player to screen bounds (optional)
+    t.position.x = Math.max(Math.min(t.position.x, 5), -5);
+    t.position.y = Math.max(Math.min(t.position.y, 4), -4);
+  }
+  }
