@@ -1,57 +1,67 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
-import {world} from "./src/world.js";
-import {Transform,MeshRenderer,Velocity,PlayerControlled,AIControlled,Collider} from "./src/components.js";
-import {MovementSystem,RenderSyncSystem,PlayerInputSystem,AISystem,CollisionSystem,CameraFollowSystem,TouchInputSystem} from "./src/systems.js";
+import {world} from "./src/ecs.js";
+import * as C from "./src/components.js";
+import * as S from "./src/systems.js";
+import {Input} from "./src/input.js";
+import {Renderer2D} from "./src/renderer2D.js";
+import {Renderer3D} from "./src/renderer3D.js";
+import {Editor} from "./src/editor.js";
 
-// THREE.JS
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x111111);
-const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
-camera.position.z = 10;
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-document.body.appendChild(renderer.domElement);
+// Canvas 2D
+const canvas=document.createElement("canvas");
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+document.body.appendChild(canvas);
+const ctx=canvas.getContext("2d");
 
-const light = new THREE.DirectionalLight(0xffffff,2);
-light.position.set(5,5,5);
-scene.add(light);
+// Three.js
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,1000);
+cam.position.z=10;
+const r3=new THREE.WebGLRenderer({alpha:true});
+r3.setSize(innerWidth,innerHeight);
+document.body.appendChild(r3.domElement);
 
-// PLAYER CUBE
-const playerMesh = new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:0x00ff00}));
-scene.add(playerMesh);
-const player = world.createEntity();
-world.addComponent(player,new Transform(0,0,0));
-world.addComponent(player,new MeshRenderer(playerMesh));
-world.addComponent(player,new Velocity());
-world.addComponent(player,new PlayerControlled());
-world.addComponent(player,new Collider());
+// light
+scene.add(new THREE.DirectionalLight(0xffffff,2));
 
-// AI CUBE
-const aiMesh = new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color:0xff0000}));
-scene.add(aiMesh);
-const ai = world.createEntity();
-world.addComponent(ai,new Transform(3,0,0));
-world.addComponent(ai,new MeshRenderer(aiMesh));
-world.addComponent(ai,new Velocity());
-world.addComponent(ai,new AIControlled(2));
-world.addComponent(ai,new Collider());
+// engine
+const input=new Input();
+const editor=new Editor(world);
 
-// SYSTEMS
-world.addSystem(new PlayerInputSystem());
-world.addSystem(new TouchInputSystem());
-world.addSystem(new AISystem());
-world.addSystem(new MovementSystem());
-world.addSystem(new CollisionSystem());
-world.addSystem(new RenderSyncSystem());
-world.addSystem(new CameraFollowSystem(camera));
+world.addSystem(new S.MovementSystem());
+world.addSystem(new S.CollisionSystem());
+world.addSystem(new S.ScriptSystem());
 
-// GAME LOOP
-let last = performance.now();
-function loop(now){
-  const dt = (now-last)/1000;
-  last = now;
-  world.update(dt);
-  renderer.render(scene,camera);
-  requestAnimationFrame(loop);
+const r2d=new Renderer2D(ctx);
+const r3d=new Renderer3D(scene);
+
+// Player
+const cube=new THREE.Mesh(new THREE.BoxGeometry(),new THREE.MeshStandardMaterial({color:0x00ff00}));
+scene.add(cube);
+
+const p=world.create();
+world.add(p,new C.Transform(0,0,0));
+world.add(p,new C.Velocity());
+world.add(p,new C.Mesh3D(cube));
+world.add(p,new C.Sprite2D(40,40,"lime"));
+world.add(p,new C.Player());
+world.add(p,new C.Script((w,e,dt)=>{
+ const t=w.get(e,"Transform");
+ t.x+=input.x()*5*dt;
+ t.y+=input.y()*5*dt;
+}));
+
+canvas.onclick=()=>editor.show(p);
+
+// loop
+let last=performance.now();
+function loop(n){
+ const dt=(n-last)/1000; last=n;
+ world.update(dt);
+ r2d.render(world);
+ r3d.render(world);
+ r3.render(scene,cam);
+ requestAnimationFrame(loop);
 }
 loop(last);
