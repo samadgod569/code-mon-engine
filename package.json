@@ -1,0 +1,33 @@
+{
+  "name": "codemon-engine",
+  "version": "1.0.0",
+  "description": "CodeMon Engine - ECS based 2D/3D browser game engine",
+  "main": "index.js",
+  "type": "module",
+  "author": "samadgod569",
+  "license": "MIT",
+  "keywords": [
+    "game-engine",
+    "ecs",
+    "threejs",
+    "minecraft",
+    "browser-game",
+    "webgl",
+    "game-dev"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samadgod569/code-mon-engine"
+  },
+  "bugs": {
+    "url": "https://github.com/samadgod569/code-mon-engine/issues"
+  },
+  "homepage": "https://github.com/samadgod569/code-mon-engine",
+  "files": [
+    "index.js",
+    "src",
+    "core",
+    "systems",
+    "services"
+  ]
+}
