@@ -1,4 +1,4 @@
-// components.js — CodeMon Engine PRO Components
+
 
 // ================= BASIC TRANSFORM =================
 export class Transform{
